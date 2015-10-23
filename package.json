@@ -1,0 +1,12 @@
+{
+  "name": "sender-js",
+  "version": "0.2.0",
+  "description": "Universal sender module",
+  "main": "sender-js.js",
+	"dependencies": {
+    "mailgun-js": "0.7.2",
+    "nodemailer": "1.8.0"
+  },
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,8 @@
+{
+  "gmail"      : "nodemailer",
+  "aol"        : "nodemailer",
+  "hotmail"    : "nodemailer",
+  "yahoo"      : "nodemailer",
+  "yandex"     : "nodemailer",
+  "mailgun"    : "mailgun-js"
+}
