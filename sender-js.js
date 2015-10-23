@@ -525,7 +525,7 @@ module.exports.getSenderServicesList = function() {
  * @returns {Object|null} Selected mail service object or null if service options are wrong
  * @throws {Error} Exception
  */
-module.exports.getSenderService = function (serviceOptions) {
+module.exports.init = function (serviceOptions) {
   try {
     setOptions(serviceOptions);
   } catch (e) {
