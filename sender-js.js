@@ -128,7 +128,7 @@ function SenderPrototype() {
   this.to = "";                // Address for "To" field. Is used as destination mail address
   this.subject = "";           // Mail subject
   this.text = "";              // Mail body
-  this.use_html = false;  // Flag to use HTML in letter
+  this.useHtml = false;  // Flag to use HTML in letter
 }
 
 /**
@@ -242,7 +242,7 @@ SenderPrototype.prototype.setText = function (text) {
  * @returns {Boolean}
  */
 SenderPrototype.prototype.getHtmlFlag = function () {
-  return this.use_html;
+  return this.useHtml;
 };
 
 /**
@@ -252,7 +252,7 @@ SenderPrototype.prototype.getHtmlFlag = function () {
  * @returns {undefined}
  */
 SenderPrototype.prototype.setHtmlFlag = function (html_flag) {
-  this.use_html = Boolean(html_flag);
+  this.useHtml = Boolean(html_flag);
 };
 
 /**
@@ -397,7 +397,7 @@ ServiceNodemailer.prototype.send = function(messageOptions, callback) {
     subject: this.subject
   };
   
-  if(this.use_html) { // Send mail as a plain text or HTML
+  if(this.useHtml) { // Send mail as a plain text or HTML
     mailOptions.html = this.text;
   } else {
     mailOptions.text = this.text;
@@ -415,7 +415,7 @@ ServiceNodemailer.prototype.send = function(messageOptions, callback) {
 /**
  * Mailgun prototype class
  * 
- * @param {Object} mailgun Options Options object needs to use Mailgun
+ * @param {Object} mailgunOptions Options object needs to use Mailgun
  * @returns {undefined}
  */
 function ServiceMailgun(mailgunOptions) {
@@ -479,9 +479,7 @@ ServiceMailgun.prototype.initialize = function (makeNew) {
 /**
  * Sends mail to the specfied mail
  * 
- * @param {String} to The recipient e-mail
- * @param {String} subject  Mail subject
- * @param {String} text Mail text
+ * @param {Object} messageOptions Message options which is used to send mail
  * @param {Function} callback Callback function
  * @returns {undefined}
  */
@@ -497,7 +495,7 @@ ServiceMailgun.prototype.send = function(messageOptions, callback) {
     subject: this.subject
   };
   
-  if(this.use_html) { // Send mail as a plain text or HTML
+  if(this.useHtml) { // Send mail as a plain text or HTML
     mailOptions.html = this.text;
   } else {
     mailOptions.text = this.text;
