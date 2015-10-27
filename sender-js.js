@@ -3,9 +3,25 @@ var services = require('./services');
 
 var senderService;  // Current sender service
 
-var options = { // Sender-js options
-  sendService: ""
-};
+var options = { };  // Sender-js options
+
+
+/**
+ * Initializes options object
+ * 
+ * @param {boolean} reInit Re-initialize options
+ * @returns {undefined}
+ */
+function initOptions(reInit) {
+  if(reInit) {
+    options = undefined;
+  }
+  
+  options = {
+    sendService: ""
+  };
+}
+initOptions();
 
 /**
  * Resolves Nodemailer options and saves them into local options object
@@ -107,7 +123,7 @@ function setOptions(newOptions) {
  * @returns {boolean} Returns true if service is supported, false if not
  */
 function isServiceSupported(service) {
-  service = service.toString(); // Forced service name to be a string
+  service = service.toString(); // Force service name to be a string
   
   for(var k in services) {
     if(k === service) {
@@ -248,11 +264,11 @@ SenderPrototype.prototype.getHtmlFlag = function () {
 /**
  * Sets HTML flag
  * 
- * @param {Boolean} html_flag New HTML flag value
+ * @param {Boolean} htmlFlag New HTML flag value
  * @returns {undefined}
  */
-SenderPrototype.prototype.setHtmlFlag = function (html_flag) {
-  this.useHtml = Boolean(html_flag);
+SenderPrototype.prototype.setHtmlFlag = function (htmlFlag) {
+  this.useHtml = Boolean(htmlFlag);
 };
 
 /**
@@ -263,13 +279,15 @@ SenderPrototype.prototype.setHtmlFlag = function (html_flag) {
  * @returns {undefined}
  */
 SenderPrototype.prototype.send = function (messageOptions, callback) {
-  try {
-    this.setTo(messageOptions.to);
-  } catch (e) {
-    callback(e);
+  if(messageOptions.hasOwnProperty("to")) {
+    try {
+      this.setTo(messageOptions.to);
+    } catch (e) {
+      callback(e);
+    }
   }
   
-  if(messageOptions.hasOwnProperty("from")) { // From field is unnecessary to specified
+  if(messageOptions.hasOwnProperty("from")) {
     try {
       this.setFrom(messageOptions.from);
     } catch (e) {
@@ -277,22 +295,33 @@ SenderPrototype.prototype.send = function (messageOptions, callback) {
     }
   }
   
-  this.setSubject(messageOptions.subject);
-  this.setText(messageOptions.text);
+  if(messageOptions.hasOwnProperty("subject")) {
+    this.setSubject(messageOptions.subject);
+  }
+  if(messageOptions.hasOwnProperty("text")) {
+    this.setText(messageOptions.text);
+  }
 };
 
 /**
  * Nodemailer prototype class
  * 
- * @param {String} mailService Mail service which is used to send mails
- * @param {Object} authData Authorization data for mail service ("user" and "pass" fields)
+ * @param {Object} nmOptions Nodemailer options
  * @returns {undefined}
  */
-function ServiceNodemailer(mailService, authData) {
+function ServiceNodemailer(nmOptions) {
   SenderPrototype.call(this);
-  
-  this.setMailService(mailService);   // Service which is used to send mail (Gmail, Yahoo, etc.)
-  this.setAuthData(authData);         // Auth data for selected service
+
+  for(var mailService in nmOptions) {}
+
+  if(mailService || options.hasOwnProperty('nodemailer')) {
+    this.setMailService(mailService);           // Service which is used to send mail (Gmail, Yahoo, etc.)
+    if(mailService) {
+      this.setAuthData(nmOptions[mailService].username, nmOptions[mailService].password);     // Auth data for selected service
+    } else {  // Trying to initialize with global options
+      this.setAuthData();
+    }
+  }
   
   this.transporter = undefined;                   // SMTP transporter for sending mails
 }
@@ -312,12 +341,17 @@ ServiceNodemailer.prototype.getMailService = function () {
  * 
  * @param {String} mailService Mail service which is used to send mails
  * @returns {undefined}
+ * @throws {Error}
  */
 ServiceNodemailer.prototype.setMailService = function(mailService) {
   if(mailService) {
     this.mailService = mailService.toString();
   } else {  // Use the default mail service
     this.mailService = options.nodemailer.service;
+  }
+  
+  if(this.mailService === "") {
+    throw new Error("@setMailService: Mail service not specified");
   }
 };
 
@@ -334,7 +368,7 @@ ServiceNodemailer.prototype.getAuthData = function () {
  * Sets the authorization data
  * 
  * @param {String} user E-mail address for sending mail
- * @param {type} password Password for e-mail
+ * @param {String} password Password for e-mail
  * @returns {undefined}
  */
 ServiceNodemailer.prototype.setAuthData = function (user, password) {
@@ -360,7 +394,7 @@ ServiceNodemailer.prototype.setAuthData = function (user, password) {
 ServiceNodemailer.prototype.initialize = function (makeNew) {
   // Creates new transporter if there is no one or if the necessary flag is set
   if(!this.transporter || makeNew) {
-    this.transporter = require(options.sendService).createTransport({
+    this.transporter = require('nodemailer').createTransport({
       service: this.mailService,
       auth: {
         user: this.authData.user,
@@ -387,9 +421,9 @@ ServiceNodemailer.prototype.initialize = function (makeNew) {
  */
 ServiceNodemailer.prototype.send = function(messageOptions, callback) {
   var self = this;
-  
+
   SenderPrototype.prototype.send.call(this, messageOptions, callback);
-  
+
   this.initialize();
   var mailOptions = {
     from: this.from,
@@ -405,9 +439,9 @@ ServiceNodemailer.prototype.send = function(messageOptions, callback) {
 
   this.transporter.sendMail(mailOptions, function(error, info) {
     if(error) {
-        callback('Mail send error: ' + error.toString() + '; To: ' + self.to + '; service: ' + self.mailService);
+        callback(error, 'Mail send error: ' + error.toString() + '; To: ' + self.to + '; service: ' + self.mailService);
     } else {
-      callback('Message sent: ' + info.response);
+      callback(error, 'Message sent: ' + info.response);
     }
   });
 };
@@ -415,13 +449,17 @@ ServiceNodemailer.prototype.send = function(messageOptions, callback) {
 /**
  * Mailgun prototype class
  * 
- * @param {Object} mailgunOptions Options object needs to use Mailgun
+ * @param {Object} mgOptions Options object needs to use Mailgun
  * @returns {undefined}
  */
-function ServiceMailgun(mailgunOptions) {
+function ServiceMailgun(mgOptions) {
   SenderPrototype.call(this);
-  
-  this.setOptions(mailgunOptions);
+
+  if(mgOptions) {
+    this.setOptions(mgOptions);
+  } else if(options.hasOwnProperty('mailgun-js')) {
+    this.setOptions();
+  }
   
   this.mailgun = undefined;
 }
@@ -441,6 +479,7 @@ ServiceMailgun.prototype.getOptions = function() {
  * @param {Object|String} [options|apiKey] Mailgun options or API key for Mailgun
  * @param {String} [domain] Mailgun domain
  * @returns {undefined}
+ * @throws {Error}
  */
 ServiceMailgun.prototype.setOptions = function() {
   var firstArg = arguments[0];
@@ -455,11 +494,13 @@ ServiceMailgun.prototype.setOptions = function() {
       apiKey: firstArg,
       domain: arguments[1]  // Domain is passed as second argument
     };
-  } else {  // If there is no arguments, we'll fill mailgun options with general options by default
+  } else if(options.hasOwnProperty('mailgun-js')) {  // If there is no arguments, we'll fill mailgun options with general options by default
     this.options = {
       apiKey: options['mailgun-js'].apiKey,
       domain: options['mailgun-js'].domain
     };
+  } else {
+    throw new Error('@setOptions Wrong Mailgun options');
   }
 };
 
@@ -472,7 +513,7 @@ ServiceMailgun.prototype.setOptions = function() {
 ServiceMailgun.prototype.initialize = function (makeNew) {
   // Creates new Mailgun object if there is no one or if the necessary flag is set
   if(!this.mailgun || makeNew) {
-    this.mailgun = require(options.sendService)(this.options);
+    this.mailgun = require('mailgun-js')(this.options);
   }
 };
 
@@ -502,11 +543,35 @@ ServiceMailgun.prototype.send = function(messageOptions, callback) {
   }
   this.mailgun.messages().send(mailOptions, function(error, body) {
     if(error) {
-      callback('Mail send error: ' + error.toString() + '; To: ' + self.to + ';');
+      callback(error, 'Mail send error: ' + error.toString() + '; To: ' + self.to + ';');
     } else {
-      callback('Message sent: ' + body.message);
+      callback(error, 'Message sent: ' + body.message);
     }
   });
+};
+
+/**
+ * Returns Nodemailer service object
+ * 
+ * @param {Object} options Nodemailer options
+ * @returns {ServiceNodemailer}
+ */
+module.exports.getNodemailerService = function() {
+  if(!arguments.length) {
+    return new ServiceNodemailer();
+  } else {
+    return new ServiceNodemailer(arguments[0]);
+  }
+};
+
+/**
+ * Returns Mailgun service object
+ * 
+ * @param {Object} options Mailgun options
+ * @returns {ServiceMailgun}
+ */
+module.exports.getMailgunService = function(options) {
+  return new ServiceMailgun(options);
 };
 
 /**
@@ -525,14 +590,14 @@ module.exports.getSenderServicesList = function() {
  * @returns {Object|null} Selected mail service object or null if service options are wrong
  * @throws {Error} Exception
  */
-module.exports.init = function (serviceOptions) {
-  try {
-    setOptions(serviceOptions);
-  } catch (e) {
-    throw new Error(e);
-  }
-  
+var init = function (serviceOptions) {
   if(!senderService) {
+    try {
+      setOptions(serviceOptions);
+    } catch (e) {
+      throw new Error(e);
+    }
+
     switch(options.sendService)
     {
       case "nodemailer":
@@ -546,4 +611,26 @@ module.exports.init = function (serviceOptions) {
   }
   
   return senderService;
+};
+module.exports.init = init;
+
+/**
+ * Reinitializes sender service object
+ * 
+ * @param {Object} serviceOptions Options to select and use sender service
+ * @returns {Object|null} Selected mail service object or null if service options are wrong
+ * @throws {Error} Exception
+ */
+module.exports.reInit = function (serviceOptions) {
+  senderService = undefined;
+  initOptions(true);
+  
+  var service;
+  try {
+    service = init(serviceOptions);
+  } catch(e) {
+    throw new Error(e);
+  }
+
+  return service;
 };

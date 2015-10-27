@@ -1,0 +1,23 @@
+{
+  "nodemailer": {
+    "gmail": {
+      "username": "some@mail.mail",
+      "password": "[mail service password]"
+    }
+  },
+  
+  "mailgun-js": {
+    "apiKey": "[your mailgun-js apikey]",
+    "domain": "[your mailgun domain]"
+  },
+  
+  "testValues": {
+    "invalidMail":  "test@com",
+    "validMail":    "test@comm.com",
+    "subject":      "Some subject",
+    "message":      "Some test message",
+    "nodemailerService": "gmail",
+    "fromEmail":    "from@mail.mail",
+    "toEmail":      "to@mail.mail"
+  }
+}

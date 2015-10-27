@@ -1,12 +1,23 @@
 {
   "name": "sender-js",
+  "author": "Invatecs Software",
+  "contributors": [
+    "Alex Sadovsky <alex.sad.dev@gmail.com>"
+  ],
   "version": "0.2.0",
   "description": "Universal sender module",
   "main": "sender-js.js",
-	"dependencies": {
+  "dependencies": {
     "mailgun-js": "0.7.2",
     "nodemailer": "1.8.0"
   },
-  "author": "",
+  "devDependencies": {
+    "jshint": "latest",
+    "mocha": "latest"
+  },
+  "scripts": {
+    "lint": "jshint *.js",
+    "test": "mocha"
+  },
   "license": "MIT"
 }
