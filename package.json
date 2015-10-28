@@ -1,15 +1,22 @@
 {
   "name": "sender-js",
   "author": "Invatecs Software",
+  "keywords": [
+    "email",
+    "mailgun",
+    "nodemailer",
+    "slack"
+  ],
   "contributors": [
     "Alex Sadovsky <alex.sad.dev@gmail.com>"
   ],
-  "version": "0.2.0",
+  "version": "0.2.5",
   "description": "Universal sender module",
-  "main": "sender-js.js",
+  "main": "./sender-js.js",
   "dependencies": {
     "mailgun-js": "0.7.2",
-    "nodemailer": "1.8.0"
+    "nodemailer": "1.8.0",
+    "slack-client": "latest"
   },
   "devDependencies": {
     "jshint": "latest",

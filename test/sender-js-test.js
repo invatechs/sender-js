@@ -1,7 +1,6 @@
 var settings = require('./settings.json');
 var assert = require('assert');
 
-//var sender = require('../sender-js.js').init(settings.nodemailer);
 var sender;
 var senderJs = require('../sender-js.js');
 
