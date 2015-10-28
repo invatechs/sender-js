@@ -4,5 +4,6 @@
   "hotmail"    : "nodemailer",
   "yahoo"      : "nodemailer",
   "yandex"     : "nodemailer",
-  "mailgun"    : "mailgun-js"
+  "mailgun"    : "mailgun-js",
+  "slack"      : "slack"
 }

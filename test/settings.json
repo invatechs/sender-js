@@ -11,6 +11,10 @@
     "domain": "[your mailgun domain]"
   },
   
+  "slack": {
+    "token": "[slack token]"
+  },
+  
   "testValues": {
     "invalidMail":  "test@com",
     "validMail":    "test@comm.com",
@@ -18,6 +22,7 @@
     "message":      "Some test message",
     "nodemailerService": "gmail",
     "fromEmail":    "from@mail.mail",
-    "toEmail":      "to@mail.mail"
+    "toEmail":      "to@mail.mail",
+    "slackRecipient": "general"
   }
 }

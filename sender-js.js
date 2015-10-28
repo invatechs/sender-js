@@ -2,6 +2,7 @@ var util = require('util');
 var services = require('./services');
 var ServiceNodemailer = require('./lib/service-nodemailer.js');
 var ServiceMailgun = require('./lib/service-mailgun.js');
+var ServiceSlack = require('./lib/service-slack.js');
 
 var senderService;  // Current sender service
 
@@ -61,7 +62,7 @@ function resolveNodemailerOptions(nmName, nmServiceName, nmOptions) {
  * Resolves Mailgun options and saves them into local options object
  * 
  * @param {String} mgName Mailgun internal service name
- * @param {type} mgOptions Mailgun options to resolve
+ * @param {Object} mgOptions Mailgun options to resolve
  * @returns {undefined}
  * @throws {Error} Exception
  */
@@ -84,6 +85,26 @@ function resolveMailgunOptions(mgName, mgOptions) {
 }
 
 /**
+ * Resolves Slack options and saves them into local options object
+ * 
+ * @param {String} slName Slack internal service name
+ * @param {Object} slOptions Slack options to resolve
+ * @returns {undefined}
+ * @throws {Error} Exception
+ */
+function resolveSlackOptions(slName, slOptions) {
+  if(!slName) {
+    throw new Error("Wrong Slack name: " + slName.toString());
+  }
+  
+  if(slOptions.hasOwnProperty('token') && slOptions.token) {
+    options[slName].token = slOptions.token;
+  } else {
+    throw new Error("Wrong Slack token: " + slOptions.token);
+  }
+}
+
+/**
  * Parses options passed by argument
  * 
  * @param {Object} newOptions Options need to be parsed
@@ -94,7 +115,6 @@ function setOptions(newOptions) {
   for(var service in newOptions) {
     if(services.hasOwnProperty(service)) {
       options[services[service]] = { };
-      
       switch(services[service]) { // Sets options for necessary service
         case "nodemailer":
           try {
@@ -107,6 +127,10 @@ function setOptions(newOptions) {
         case "mailgun-js":
           resolveMailgunOptions(services[service], newOptions[service]);
           options.sendService = "mailgun-js";
+          break;
+        case "slack":
+          resolveSlackOptions(services[service], newOptions[service]);
+          options.sendService = "slack";
           break;
       }
 
@@ -161,6 +185,16 @@ module.exports.getMailgunService = function(options) {
 };
 
 /**
+ * Return Slack service object
+ * 
+ * @param {Object} options Slack options
+ * @returns {SlackService}
+ */
+module.exports.getSlackService = function(options) {
+  return new ServiceSlack.getService(options);
+};
+
+/**
  * Returns list of supported services
  * 
  * @returns {Object}
@@ -193,6 +227,10 @@ var init = function (serviceOptions) {
       case "mailgun-js":
         ServiceMailgun.setOptions(options);
         senderService = new ServiceMailgun.getService();
+        break;
+      case "slack":
+        ServiceSlack.setOptions(options);
+        senderService = new ServiceSlack.getService();
         break;
       default:
     }

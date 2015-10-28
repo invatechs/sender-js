@@ -34,12 +34,12 @@ module.exports = {
   },
   
   'test invalid setTo value': function(done) {
-    assert.throws(function() {sender.setTo(settings.testValues.invalidMail);}, Error);
+    assert.throws(function() {sender.setTo(settings.testValues.invalidMail, true);}, Error);
     done();
   },
   
   'test valid setTo value': function(done) {
-    assert.doesNotThrow(function () {sender.setTo(settings.testValues.validMail)}, Error);
+    assert.doesNotThrow(function () {sender.setTo(settings.testValues.validMail, true)}, Error);
     done();
   },
   
@@ -172,6 +172,18 @@ module.exports = {
     done();
   },
   
+  //
+  // Getting functions
+  //
+  
+  'test Mailgun getOptions value': function(done) {
+    assert.equal( typeof sender.getOptions(), 'object' );
+    done();
+  },
+  
+  //
+  // Send function
+  //
   'test Mailgun send email with predefined message options': function(done) {
     try {
       sender.setFrom(settings.testValues.fromEmail);
@@ -200,7 +212,50 @@ module.exports = {
   },
   
   //
+  // Slack functions
+  // Slack service init
+  //
+  'test Slack service init': function(done) {
+    sender = senderJs.getSlackService(settings.slack);
+    assert.equal( typeof sender, 'object' );
+    done();
+  },
+  
+  //
+  // Setting functions
+  //
+  'test Slack setToken function with options object argument': function(done) {
+    assert.doesNotThrow(function () {sender.setToken(settings['slack'].token);}, Error);
+    done();
+  },
+  
+  //
+  // Getting functions
+  //
+  
+  'test Slack getToken value': function(done) {
+    assert.notEqual(sender.getToken(), "");
+    done();
+  },
+  
+  //
+  // Send function
+  //
+    'test Slack send message': function(done) {
+    var messageOptions = {
+      to: settings.testValues.slackRecipient,
+      text: settings.testValues.message + ' ' + 'test send message via Slack'
+    };
+    
+    sender.send(messageOptions, function(err, message) {
+      assert.ifError(err);
+      done();
+    });
+  },
+  
+  //
   // Common sender-js init
+  // Nodemailer
   //
   'test sender-js common initialization with Nodemailer gmail credentials': function(done) {
     assert.doesNotThrow(function() {
@@ -224,7 +279,10 @@ module.exports = {
     });
   },
   
-  'test sender-js common re-initialization with Mailgun gmail credentials': function(done) {
+  //
+  // Mailgun
+  //
+  'test sender-js common re-initialization with Mailgun credentials': function(done) {
     var mgSettings = {mailgun: settings['mailgun-js']};
     assert.doesNotThrow(function() {
       sender = senderJs.reInit(mgSettings);
@@ -239,6 +297,30 @@ module.exports = {
       to: settings.testValues.toEmail,
       subject: settings.testValues.subject,
       text: settings.testValues.message + 'test send email via common interface via Mailgun'
+    };
+
+    sender.send(messageOptions, function(err, message) {
+      assert.ifError(err);
+      done();
+    });
+  },
+  
+  //
+  // Slack
+  //
+  'test sender-js common re-initialization with Slack credentials': function(done) {
+    var slSettings = {slack: settings['slack']};
+    assert.doesNotThrow(function() {
+      sender = senderJs.reInit(slSettings);
+    }, Error);
+    assert.ok(typeof sender, "object");
+    done();
+  },
+  
+  'test Slack send message via common interface': function(done) {
+    var messageOptions = {
+      to: settings.testValues.slackRecipient,
+      text: settings.testValues.message + 'test send email via common interface via Slack'
     };
 
     sender.send(messageOptions, function(err, message) {
