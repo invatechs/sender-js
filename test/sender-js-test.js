@@ -1,4 +1,12 @@
-var settings = require('./settings.json');
+var settings = {};
+
+try {
+  settings = require('./settings.local.json');
+} catch(e) {
+  settings = require('./settings.json');
+}
+
+
 var assert = require('assert');
 
 var sender;
