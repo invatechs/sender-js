@@ -366,7 +366,7 @@ module.exports = {
       subject: settings.testValues.subject,
       text: settings.testValues.message + ' test multiple messages send'
     };
-    
+
     senderJs.send(messageOptions, function(err, message) {
       assert.ifError(err);
       done();
