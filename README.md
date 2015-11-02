@@ -8,9 +8,115 @@ Simple Node.js module for sending messages by e-mail or [Slack](https://slack.co
 
 ## Usage overview
 
-This module provides e-mail sending functionality via Nodemailer or Mailgun modules, and supports sending messages to Slack team collaboration tool. The messages can be sent separately or by all three services simultaneously.
+This module provides e-mail sending functionality via Nodemailer or Mailgun modules, and supports sending messages to Slack team collaboration tool.
 
+The messages can be sent separately or by all three services simultaneously.
 
+Common Nodemailer usage with single service instance:
+```js
+var sender = require('sender-js');
+
+var settings = {
+  gmail: {
+    "username": "your.mail@gmail.com",
+    "password": "yourPassword"
+	}
+};
+
+sender.init(settings, true);
+
+var messageOptions = {
+	to: 'recipient.mail@somemail.com',
+	from: 'your.mail@mail.mail',
+  subject: 'fff',
+  text: 'test nodemailer text'
+};
+
+sender.send(messageOptions, function(err, message) {
+	console.log(err + ' ' + message);
+});
+```
+
+Common Mailgun usage with single service instance:
+```js
+var sender = require('sender-js');
+
+var settings = {
+  mailgun: {
+    "apiKey": "key-somekey",
+    "domain": "mg.yourdomain"
+	}
+};
+
+sender.init(settings, true);
+
+var messageOptions = {
+	to: 'recipient.mail@somemail.com',
+	from: 'your.mail@mail.mail',
+  subject: 'fff',
+  text: 'test mailgun test'
+};
+
+sender.send(messageOptions, function(err, message) {
+	console.log(err + ' ' + message);
+});
+```
+
+Common Slack usage with single service instance:
+```js
+var sender = require('sender-js');
+
+var settings = {
+  slack: {
+    "token": "sasd-asdasdasdasdasdasda"
+	}
+};
+
+sender.init(settings, true);
+
+var messageOptions = {
+	to: 'common',
+  text: 'test slack text'
+};
+
+sender.send(messageOptions, function(err, message) {
+	console.log(err + ' ' + message);
+});
+```
+
+To send multiple messages you should specify options to all services you going to use:
+```js
+var sender = require('sender-js');
+
+var settings = {
+	gmail: {
+    "username": "your.mail@gmail.com",
+    "password": "yourPassword"
+	},
+	mailgun: {
+    "apiKey": "key-somekey",
+    "domain": "mg.yourdomain"
+	},
+  slack: {
+    "token": "sasd-asdasdasdasdasdasda"
+	}
+};
+
+// If we don't use the second argument, multiple service objects will be created
+sender.init(settings);
+
+var messageOptions = {
+	to: 'recipient.mail@somemail.com',
+	toSlack: 'common',	// Slack destination name should be specified separately
+	from: 'your.mail@mail.mail',
+  subject: 'fff',
+  text: 'test mailgun test'
+};
+
+sender.send(messageOptions, function(err, message) {
+	console.log(err + ' ' + message);
+});
+```
 
 ## Tests
 
