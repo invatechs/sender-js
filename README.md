@@ -8,7 +8,9 @@ Simple Node.js module for sending messages by e-mail or [Slack](https://slack.co
 
 ## Usage overview
 
-This module provides e-mail sending functionality via Nodemailer or Mailgun modules, and supports sending messages to Slack team collaboration tool.
+This module provides e-mail sending functionality via Nodemailer or Mailgun modules, and supports sending messages to Slack team collaboration tool. The messages can be sent separately or by all three services simultaneously.
+
+
 
 ## Tests
 
