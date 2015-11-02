@@ -183,9 +183,9 @@ function getServiceIntName(service) {
  */
 module.exports.getNodemailerService = function() {
   if(!arguments.length) {
-    return new ServiceNodemailer.getService();
+    return new ServiceNodemailer();
   } else {
-    return new ServiceNodemailer.getService(arguments[0]);
+    return new ServiceNodemailer(arguments[0]);
   }
 };
 
@@ -196,7 +196,7 @@ module.exports.getNodemailerService = function() {
  * @returns {ServiceMailgun}
  */
 module.exports.getMailgunService = function(options) {
-  return new ServiceMailgun.getService(options);
+  return new ServiceMailgun(options);
 };
 
 /**
@@ -206,7 +206,7 @@ module.exports.getMailgunService = function(options) {
  * @returns {SlackService}
  */
 module.exports.getSlackService = function(options) {
-  return new ServiceSlack.getService(options);
+  return new ServiceSlack(options);
 };
 
 /**
@@ -238,16 +238,13 @@ var init = function (serviceOptions, singleService) {
       switch(options.sendServices[i])
       {
         case "nodemailer":
-          ServiceNodemailer.setOptions(options);
-          senderServices['nodemailer'] = new ServiceNodemailer.getService();
+          senderServices['nodemailer'] = new ServiceNodemailer(options, true);
           break;
         case "mailgun-js":
-          ServiceMailgun.setOptions(options);
-          senderServices['mailgun-js'] = new ServiceMailgun.getService();
+          senderServices['mailgun-js'] = new ServiceMailgun(options, true);
           break;
         case "slack":
-          ServiceSlack.setOptions(options);
-          senderServices['slack'] = new ServiceSlack.getService();
+          senderServices['slack'] = new ServiceSlack(options, true);
           break;
       }
       
@@ -292,7 +289,7 @@ module.exports.send = function (messageOptions, callback) {
   if(!messageOptions) {
     throw new Error("@send; Message options are empty");
   }
-    
+
   // Send message to the specified services
   var usedServices = [];
   if(messageOptions.hasOwnProperty('services')) {
@@ -307,9 +304,7 @@ module.exports.send = function (messageOptions, callback) {
 
   usedServices.forEach(function(service) {
     senderServices[service].send(messageOptions, function(err, message) {
-      console.log(message);
       callback(err, message);
-      //setTimeout(function(){callback(err, message);}, 2000);
-    });
+    }, callback);
   });
 };
