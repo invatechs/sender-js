@@ -4,7 +4,7 @@ var ServiceNodemailer = require('./lib/service-nodemailer.js');
 var ServiceMailgun = require('./lib/service-mailgun.js');
 var ServiceSlack = require('./lib/service-slack.js');
 
-var senderService;  // Current sender service
+var senderServices = {};  // Current sender service
 
 var options = { };  // Sender-js options
 
@@ -20,7 +20,7 @@ function initOptions(reInit) {
   }
   
   options = {
-    sendService: ""
+    sendServices: []
   };
 }
 initOptions();
@@ -119,22 +119,20 @@ function setOptions(newOptions) {
         case "nodemailer":
           try {
             resolveNodemailerOptions(services[service], service, newOptions[service]);
-            options.sendService = "nodemailer";
+            options.sendServices.push("nodemailer");
           } catch (e) {
             throw new Error(e);
           }
           break;
         case "mailgun-js":
           resolveMailgunOptions(services[service], newOptions[service]);
-          options.sendService = "mailgun-js";
+          options.sendServices.push("mailgun-js");
           break;
         case "slack":
           resolveSlackOptions(services[service], newOptions[service]);
-          options.sendService = "slack";
+          options.sendServices.push("slack");
           break;
       }
-
-      return;
     } else {
       throw new Error("Service " + services[service] + " not supported");
     }
@@ -159,6 +157,23 @@ function isServiceSupported(service) {
   return false;
 }
 
+/**
+ * Gets services internal name
+ * 
+ * @param {String} service Service name to resolve
+ * @returns {}
+ */
+function getServiceIntName(service) {
+  service = service.toString(); // Force service name to be a string
+  
+  for(var k in services) {
+    if(k === service) {
+      return services[service];
+    }
+  }
+  
+  return null;
+}
 
 /**
  * Returns Nodemailer service object
@@ -168,9 +183,9 @@ function isServiceSupported(service) {
  */
 module.exports.getNodemailerService = function() {
   if(!arguments.length) {
-    return new ServiceNodemailer.getService();
+    return new ServiceNodemailer();
   } else {
-    return new ServiceNodemailer.getService(arguments[0]);
+    return new ServiceNodemailer(arguments[0]);
   }
 };
 
@@ -181,7 +196,7 @@ module.exports.getNodemailerService = function() {
  * @returns {ServiceMailgun}
  */
 module.exports.getMailgunService = function(options) {
-  return new ServiceMailgun.getService(options);
+  return new ServiceMailgun(options);
 };
 
 /**
@@ -191,7 +206,7 @@ module.exports.getMailgunService = function(options) {
  * @returns {SlackService}
  */
 module.exports.getSlackService = function(options) {
-  return new ServiceSlack.getService(options);
+  return new ServiceSlack(options);
 };
 
 /**
@@ -207,36 +222,44 @@ module.exports.getSenderServicesList = function() {
  * Returns sender service object which is specified in options
  * 
  * @param {Object} serviceOptions Options to select and use sender service
- * @returns {Object|null} Selected mail service object or null if service options are wrong
+ * @param {boolean} singleService Flag to use single or multiple sending services
+ * @returns {Object|null} Selected sender service object or null if there more then one service
  * @throws {Error} Exception
  */
-var init = function (serviceOptions) {
-  if(!senderService) {
+var init = function (serviceOptions, singleService) {
+  if(!Object.keys(senderServices).length) {
     try {
       setOptions(serviceOptions);
     } catch (e) {
       throw new Error(e);
     }
 
-    switch(options.sendService)
-    {
-      case "nodemailer":
-        ServiceNodemailer.setOptions(options);
-        senderService = new ServiceNodemailer.getService();
+    for(var i = 0; i < options.sendServices.length; i++) {
+      switch(options.sendServices[i])
+      {
+        case "nodemailer":
+          senderServices['nodemailer'] = new ServiceNodemailer(options, true);
+          break;
+        case "mailgun-js":
+          senderServices['mailgun-js'] = new ServiceMailgun(options, true);
+          break;
+        case "slack":
+          senderServices['slack'] = new ServiceSlack(options, true);
+          break;
+      }
+      
+      if(singleService) {
+        senderServices = senderServices[options.sendServices[i]];
         break;
-      case "mailgun-js":
-        ServiceMailgun.setOptions(options);
-        senderService = new ServiceMailgun.getService();
-        break;
-      case "slack":
-        ServiceSlack.setOptions(options);
-        senderService = new ServiceSlack.getService();
-        break;
-      default:
+      }
     }
   }
   
-  return senderService;
+  if(singleService) {
+    return senderServices;
+  } else {
+    return null;
+  }
 };
 module.exports.init = init;
 
@@ -244,19 +267,44 @@ module.exports.init = init;
  * Reinitializes sender service object
  * 
  * @param {Object} serviceOptions Options to select and use sender service
+ * @param {boolean} singleService Flag to use single or multiple sending services
  * @returns {Object|null} Selected mail service object or null if service options are wrong
  * @throws {Error} Exception
  */
-module.exports.reInit = function (serviceOptions) {
-  senderService = undefined;
+module.exports.reInit = function (serviceOptions, singleService) {
+  senderServices = {};
   initOptions(true);
-  
+
   var service;
   try {
-    service = init(serviceOptions);
+    service = init(serviceOptions, singleService);
   } catch(e) {
     throw new Error(e);
   }
 
   return service;
+};
+
+module.exports.send = function (messageOptions, callback) {
+  if(!messageOptions) {
+    throw new Error("@send; Message options are empty");
+  }
+
+  // Send message to the specified services
+  var usedServices = [];
+  if(messageOptions.hasOwnProperty('services')) {
+    messageOptions.services.forEach(function(service){
+      usedServices.push(getServiceIntName(service));
+    });
+  } else {
+    for(var k in senderServices) {
+      usedServices.push(k);
+    }
+  }
+
+  usedServices.forEach(function(service) {
+    senderServices[service].send(messageOptions, function(err, message) {
+      callback(err, message);
+    }, callback);
+  });
 };

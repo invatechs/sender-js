@@ -2,3 +2,4 @@ nbproject
 node_modules
 .idea
 test/settings.local.json
+slack.js
