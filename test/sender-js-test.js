@@ -261,32 +261,32 @@ module.exports = {
 //    });
 //  },
 //  
-//  //
-//  // Common sender-js init
-//  // Nodemailer
-//  //
-//  'test sender-js common initialization with Nodemailer gmail credentials': function(done) {
-//    assert.doesNotThrow(function() {
-//      sender = senderJs.init(settings.nodemailer, true);
-//    }, Error);
-//    assert.ok(typeof sender, "object");
-//    done();
-//  },
-//  
-//  'test Nodemailer send email via common interface': function(done) {
-//    var messageOptions = {
-//      from: settings.testValues.fromEmail,
-//      to: settings.testValues.toEmail,
-//      subject: settings.testValues.subject,
-//      text: settings.testValues.message + 'test send email via common interface via Nodemailer'
-//    };
-//
-//    sender.send(messageOptions, function(err, message) {
-//      assert.ifError(err);
-//      done();
-//    });
-//  },
-//  
+  //
+  // Common sender-js init
+  // Nodemailer
+  //
+  'test sender-js common initialization with Nodemailer gmail credentials': function(done) {
+    assert.doesNotThrow(function() {
+      sender = senderJs.init(settings.nodemailer, true);
+    }, Error);
+    assert.ok(typeof sender, "object");
+    done();
+  },
+  
+  'test Nodemailer send email via common interface': function(done) {
+    var messageOptions = {
+      from: settings.testValues.fromEmail,
+      to: settings.testValues.toEmail,
+      subject: settings.testValues.subject,
+      text: settings.testValues.message + 'test send email via common interface via Nodemailer'
+    };
+
+    sender.send(messageOptions, function(err, message) {
+      assert.ifError(err);
+      done();
+    });
+  },
+  
 //  //
 //  // Mailgun
 //  //
@@ -312,31 +312,31 @@ module.exports = {
 //      done();
 //    });
 //  },
-  
-  //
-  // Slack
-  //
-  'test sender-js common re-initialization with Slack credentials': function(done) {
-    var slSettings = {slack: settings['slack']};
-    assert.doesNotThrow(function() {
-      sender = senderJs.reInit(slSettings, true);
-    }, Error);
-    assert.ok(typeof sender, "object");
-    done();
-  },
-  
-  'test Slack send message via common interface': function(done) {
-    var messageOptions = {
-      to: settings.testValues.slackRecipient,
-      text: settings.testValues.message + 'test send email via common interface via Slack'
-    };
-
-    sender.send(messageOptions, function(err, message) {
-      assert.ifError(err);
-      done();
-    });
-  },
-  
+//  
+//  //
+//  // Slack
+//  //
+//  'test sender-js common re-initialization with Slack credentials': function(done) {
+//    var slSettings = {slack: settings['slack']};
+//    assert.doesNotThrow(function() {
+//      sender = senderJs.reInit(slSettings, true);
+//    }, Error);
+//    assert.ok(typeof sender, "object");
+//    done();
+//  },
+//  
+//  'test Slack send message via common interface': function(done) {
+//    var messageOptions = {
+//      to: settings.testValues.slackRecipient,
+//      text: settings.testValues.message + 'test send email via common interface via Slack'
+//    };
+//
+//    sender.send(messageOptions, function(err, message) {
+//      assert.ifError(err);
+//      done();
+//    });
+//  },
+//  
 //  'test supported services list return': function(done) {
 //    assert.equal( typeof senderJs.getSenderServicesList(), 'object' );
 //    done();
