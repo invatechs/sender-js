@@ -9,6 +9,20 @@ var senderServices = {};  // Current sender service
 var options = { };  // Sender-js options
 
 /**
+ * Checks if array or object is empty
+ * 
+ * @param {Array|Object} dataVar Variable to check
+ * @returns {boolean} Returns true if empty
+ */
+function isEmpty(dataVar) {
+  if(typeof dataVar === 'object' && !Object.keys(dataVar).length) {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
  * Initializes options object
  * 
  * @param {boolean} reInit Re-initialize options
@@ -219,15 +233,27 @@ module.exports.getSenderServicesList = function() {
 };
 
 /**
+ * Returns current service object
+ * 
+ * @returns {Object}
+ */
+module.exports.getCurrentService = function() {
+  if(Object.keys(senderServices).length == 1) {
+    return senderServices[Object.keys(senderServices)[0]];
+  } else {
+    return senderServices;
+  }
+}
+
+/**
  * Returns sender service object which is specified in options
  * 
  * @param {Object} serviceOptions Options to select and use sender service
- * @param {boolean} singleService Flag to use single or multiple sending services
- * @returns {Object|null} Selected sender service object or null if there more then one service
+ * @returns {undefined}
  * @throws {Error} Exception
  */
-var init = function (serviceOptions, singleService) {
-  if(!Object.keys(senderServices).length) {
+var init = function (serviceOptions) {
+  if(isEmpty(senderServices)) {
     try {
       setOptions(serviceOptions);
     } catch (e) {
@@ -247,18 +273,7 @@ var init = function (serviceOptions, singleService) {
           senderServices['slack'] = new ServiceSlack(options, true);
           break;
       }
-      
-      if(singleService) {
-        senderServices = senderServices[options.sendServices[i]];
-        break;
-      }
     }
-  }
-  
-  if(singleService) {
-    return senderServices;
-  } else {
-    return null;
   }
 };
 module.exports.init = init;
@@ -267,24 +282,28 @@ module.exports.init = init;
  * Reinitializes sender service object
  * 
  * @param {Object} serviceOptions Options to select and use sender service
- * @param {boolean} singleService Flag to use single or multiple sending services
- * @returns {Object|null} Selected mail service object or null if service options are wrong
+ * @returns {undefined}
  * @throws {Error} Exception
  */
-module.exports.reInit = function (serviceOptions, singleService) {
+module.exports.reInit = function (serviceOptions) {
   senderServices = {};
   initOptions(true);
 
   var service;
   try {
-    service = init(serviceOptions, singleService);
+    init(serviceOptions);
   } catch(e) {
     throw new Error(e);
   }
-
-  return service;
 };
 
+/**
+ * Sends message to activated services
+ * 
+ * @param {object} messageOptions Message text and options
+ * @param {function} callback
+ * @returns {undefined}
+ */
 module.exports.send = function (messageOptions, callback) {
   if(!messageOptions) {
     throw new Error("@send; Message options are empty");
