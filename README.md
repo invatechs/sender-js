@@ -23,7 +23,7 @@ var settings = {
 	}
 };
 
-sender.init(settings, true);
+sender.init(settings);
 
 var messageOptions = {
 	to: 'recipient.mail@somemail.com',
@@ -48,7 +48,7 @@ var settings = {
 	}
 };
 
-sender.init(settings, true);
+sender.init(settings);
 
 var messageOptions = {
 	to: 'recipient.mail@somemail.com',
@@ -72,7 +72,7 @@ var settings = {
 	}
 };
 
-sender.init(settings, true);
+sender.init(settings);
 
 var messageOptions = {
 	to: 'common',
@@ -107,10 +107,12 @@ sender.init(settings);
 
 var messageOptions = {
 	to: 'recipient.mail@somemail.com',
-	toSlack: 'common',	// Slack destination name should be specified separately
 	from: 'your.mail@mail.mail',
   subject: 'fff',
-  text: 'test mailgun test'
+  text: 'test mailgun test',
+	slack: {	// Slack destination name should be specified separately
+	 to: 'common'
+	}
 };
 
 sender.send(messageOptions, function(err, message) {
