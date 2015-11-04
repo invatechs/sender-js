@@ -362,11 +362,14 @@ module.exports = {
   
   'test multiple message send': function(done) {
     var messageOptions = {
+      services: ['slack'],
       to: settings.testValues.toEmail,
-      toSlack: settings.testValues.slackRecipient,
       from: settings.testValues.fromEmail,
       subject: settings.testValues.subject,
-      text: settings.testValues.message + ' test multiple messages send'
+      text: settings.testValues.message + ' test multiple messages send',
+      slack: {
+        to: settings.testValues.slackRecipient
+      }
     };
 
     senderJs.send(messageOptions, function(err, message) {
