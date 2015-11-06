@@ -16,7 +16,9 @@
   },
   
   "request": {
-    "url": "http://some.url"
+    "url": "http://jsonplaceholder.typicode.com/posts",
+    "method": "GET",
+    "json": false
   },
   
   "testValues": {
@@ -27,6 +29,21 @@
     "nodemailerService": "gmail",
     "fromEmail":    "from@mail.mail",
     "toEmail":      "to@mail.mail",
-    "slackRecipient": "general"
+    "slackRecipient": "general",
+    "requestHeaders": {
+      "Content-Type": "application/x-shockwave-flash"
+    },
+    "requestHeadersReplace": {
+      "Content-Type": "application/css"
+    },
+    "requestQs": {
+      "id": "333"
+    },
+    "requestQsReplace" : {
+      "name": "Zyama"
+    },
+    "requestMessage": {
+      "sadf": "fdf"
+    }
   }
 }

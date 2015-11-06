@@ -106,6 +106,7 @@ var settings = {
 sender.init(settings);
 
 var messageOptions = {
+	to: 'common',
   text: 'test slack text'
 };
 
