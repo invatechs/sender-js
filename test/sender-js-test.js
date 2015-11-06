@@ -184,8 +184,8 @@ module.exports = {
   // Getting functions
   //
   
-  'test Mailgun getOptions value': function(done) {
-    assert.equal( typeof sender.getOptions(), 'object' );
+  'test Mailgun getCredentials value': function(done) {
+    assert.equal( typeof sender.getCredentials(), 'object' );
     done();
   },
   
@@ -253,6 +253,92 @@ module.exports = {
     var messageOptions = {
       to: settings.testValues.slackRecipient,
       text: settings.testValues.message + ' ' + 'test send message via Slack'
+    };
+    
+    sender.send(messageOptions, function(err, message) {
+      assert.ifError(err);
+      done();
+    });
+  },
+  
+  //
+  // Request functions
+  // Request service init
+  //
+  'test Request service init': function(done) {
+    sender = senderJs.getRequestService(settings.request);
+    assert.equal( typeof sender, 'object' );
+    done();
+  },
+  
+  //
+  // Setting functions
+  //
+  'test Request setMethod function with options object argument': function(done) {
+    assert.doesNotThrow(function () {sender.setMethod(settings['request'].method);}, Error);
+    done();
+  },
+  
+  'test Request setTo function with URL argument': function(done) {
+    assert.doesNotThrow(function () {sender.setTo(settings['request'].url);}, Error);
+    done();
+  },
+  
+  'test Request addHeaders function with options object argument': function(done) {
+    assert.doesNotThrow(function () {sender.addHeaders(settings.testValues.requestHeaders);}, Error);
+    done();
+  },
+  
+  'test Request addHeaders function to replace current headers': function(done) {
+    assert.doesNotThrow(function () {sender.addHeaders(settings.testValues.requestHeadersReplace, true);}, Error);
+    done();
+  },
+  
+  'test Request addQsParams function with options object argument': function(done) {
+    assert.doesNotThrow(function () {sender.addQsParams(settings.testValues.requestQs);}, Error);
+    done();
+  },
+  
+  'test Request addQsParams function to replace current query string parameters': function(done) {
+    assert.doesNotThrow(function () {sender.addQsParams(settings.testValues.requestQsReplace, true);}, Error);
+    done();
+  },
+  
+  'test setJson function': function(done) {
+    assert.ok(!sender.setJson(settings['request'].json));
+    done();
+  },
+  
+  //
+  // Getting functions
+  //
+  
+  'test Request getMethod value': function(done) {
+    assert.notEqual(sender.getMethod(), "");
+    done();
+  },
+  
+  'test Request getHeaders value': function(done) {
+    assert.equal(typeof sender.getHeaders(), "object");
+    done();
+  },
+  
+  'test Request getQueryString value': function(done) {
+    assert.equal(typeof sender.getQueryString(), "object");
+    done();
+  },
+  
+  'test getJson value': function(done) {
+    assert.notEqual(sender.getJson(), undefined);
+    done();
+  },
+  
+  //
+  // Send function
+  //
+  'test Request send message': function(done) {
+    var messageOptions = {
+      text: settings.testValues.requestMessage
     };
     
     sender.send(messageOptions, function(err, message) {
@@ -340,6 +426,30 @@ module.exports = {
     });
   },
   
+  //
+  // Request
+  //
+  'test sender-js common re-initialization with Request only credentials': function(done) {
+    var rqSettings = {http: settings['request']};
+    assert.doesNotThrow(function() {
+      senderJs.reInit(rqSettings);
+      sender = senderJs.getCurrentService();
+    }, Error);
+    assert.ok(typeof sender, "object");
+    done();
+  },
+  
+    'test Request send message via common interface': function(done) {
+    var messageOptions = {
+      text: settings.testValues.requestMessage
+    };
+
+    sender.send(messageOptions, function(err, message) {
+      assert.ifError(err);
+      done();
+    });
+  },
+  
   'test supported services list return': function(done) {
     assert.equal( typeof senderJs.getSenderServicesList(), 'object' );
     done();
@@ -351,7 +461,8 @@ module.exports = {
       var mSettings = {
         gmail: settings.nodemailer.gmail,
         slack: settings.slack,
-        mailgun: settings['mailgun-js']
+        mailgun: settings['mailgun-js'],
+        http: settings.request
       };
       
       senderJs.reInit(mSettings);
@@ -362,13 +473,13 @@ module.exports = {
   
   'test multiple message send': function(done) {
     var messageOptions = {
-      services: ['slack'],
+      services: ['http'],
       to: settings.testValues.toEmail,
       from: settings.testValues.fromEmail,
       subject: settings.testValues.subject,
       text: settings.testValues.message + ' test multiple messages send',
-      slack: {
-        to: settings.testValues.slackRecipient
+      http: {
+        url: settings.request.url
       }
     };
 

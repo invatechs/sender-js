@@ -15,6 +15,10 @@
     "token": "[slack token]"
   },
   
+  "request": {
+    "url": "http://some.url"
+  },
+  
   "testValues": {
     "invalidMail":  "test@com",
     "validMail":    "test@comm.com",

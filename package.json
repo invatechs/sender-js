@@ -10,13 +10,14 @@
   "contributors": [
     "Alex Sadovsky <alex.sad.dev@gmail.com>"
   ],
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "Universal sender module",
   "main": "./sender-js.js",
   "dependencies": {
     "mailgun-js": "0.7.2",
     "nodemailer": "1.8.0",
-    "slack-client": "latest"
+    "slack-client": "latest",
+    "request": "latest"
   },
   "devDependencies": {
     "jshint": "latest",

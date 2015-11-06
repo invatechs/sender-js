@@ -1,0 +1,10 @@
+var express = require('express');
+
+var app = express();
+
+app.post('/test', function(request, response){
+	console.log(request);
+	response.status(200).send("OK");
+});
+
+app.listen(9506);

@@ -3,6 +3,7 @@ var services = require('./services');
 var ServiceNodemailer = require('./lib/service-nodemailer.js');
 var ServiceMailgun = require('./lib/service-mailgun.js');
 var ServiceSlack = require('./lib/service-slack.js');
+var ServiceRequest = require('./lib/service-request.js');
 
 var senderServices = {};  // Current sender service
 
@@ -119,6 +120,40 @@ function resolveSlackOptions(slName, slOptions) {
 }
 
 /**
+ * Resolves Request options and saves them into local options object
+ * 
+ * @param {String} rqName Request internal service name
+ * @param {Object} rqOptions Request options to resolve
+ * @returns {undefined}
+ * @throws {Error} Exception
+ */
+function resolveRequestOptions(rqName, rqOptions) {
+  if(!rqName) {
+    throw new Error("Wrong Request name: " + rqName.toString());
+  }
+  
+  if(rqOptions.hasOwnProperty('method') && rqOptions.method) {
+    options[rqName].method = rqOptions.method;
+  }
+  
+  if(rqOptions.hasOwnProperty('url') && rqOptions.url) {
+    options[rqName].url = rqOptions.url;
+  }
+  
+  if(rqOptions.hasOwnProperty('headers') && !isEmpty(rqOptions['headers'])) {
+    options[rqName].headers = rqOptions.headers;
+  }
+  
+  if(rqOptions.hasOwnProperty('queryString') && !isEmpty(rqOptions['queryString'])) {
+    options[rqName].queryString = rqOptions.queryString;
+  }
+  
+  if(rqOptions.hasOwnProperty('json') && rqOptions.json) {
+    options[rqName].json = rqOptions.json;
+  }
+}
+
+/**
  * Parses options passed by argument
  * 
  * @param {Object} newOptions Options need to be parsed
@@ -145,6 +180,10 @@ function setOptions(newOptions) {
         case "slack":
           resolveSlackOptions(services[service], newOptions[service]);
           options.sendServices.push("slack");
+          break;
+        case "request":
+          resolveRequestOptions(services[service], newOptions[service]);
+          options.sendServices.push("request");
           break;
       }
     } else {
@@ -223,6 +262,10 @@ module.exports.getSlackService = function(options) {
   return new ServiceSlack(options);
 };
 
+module.exports.getRequestService = function(options) {
+  return new ServiceRequest(options);
+};
+
 /**
  * Returns list of supported services
  * 
@@ -238,12 +281,12 @@ module.exports.getSenderServicesList = function() {
  * @returns {Object}
  */
 module.exports.getCurrentService = function() {
-  if(Object.keys(senderServices).length == 1) {
+  if(Object.keys(senderServices).length === 1) {
     return senderServices[Object.keys(senderServices)[0]];
   } else {
     return senderServices;
   }
-}
+};
 
 /**
  * Returns sender service object which is specified in options
@@ -271,6 +314,9 @@ var init = function (serviceOptions) {
           break;
         case "slack":
           senderServices['slack'] = new ServiceSlack(options, true);
+          break;
+        case "request":
+          senderServices['request'] = new ServiceRequest(options, true);
           break;
       }
     }
