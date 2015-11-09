@@ -4,3 +4,5 @@ node_modules
 test/settings.local.json
 slack.js
 request.js
+request.js~
+README.md~
