@@ -21,6 +21,11 @@
     "json": false
   },
   
+  "telegram": {
+    "token": "[teleram token]",
+    "chatId": "[chat ID]"
+  },
+  
   "testValues": {
     "invalidMail":  "test@com",
     "validMail":    "test@comm.com",

@@ -348,6 +348,58 @@ module.exports = {
   },
   
   //
+  // Telegram functions
+  // Telegram service init
+  //
+  'test Telegram service init': function(done) {
+    sender = senderJs.getTelegramService(settings.telegram);
+    assert.equal( typeof sender, 'object' );
+    done();
+  },
+  
+  //
+  // Setting functions
+  //
+  'test Telegram setToken function with options object argument': function(done) {
+    assert.doesNotThrow(function () {sender.setToken(settings['telegram'].token);}, Error);
+    done();
+  },
+  
+  'test Telegram setCharId function with options string argument': function(done) {
+    assert.doesNotThrow(function () {sender.setChatId(settings['telegram'].chatId);}, Error);
+    done();
+  },
+  
+  //
+  // Getting functions
+  //
+  
+  'test Telegram getToken value': function(done) {
+    assert.notEqual(sender.getToken(), "");
+    done();
+  },
+  
+  'test Telegram getChatId value': function(done) {
+    assert.notEqual(sender.getChatId(), "");
+    done();
+  },
+  
+  //
+  // Send function
+  //
+    'test Telegram send message': function(done) {
+    var messageOptions = {
+      text: settings.testValues.message + ' ' + 'test send message via Telegram'
+    };
+    
+    sender.send(messageOptions, function(err, message) {
+      assert.ifError(err);
+      done();
+    });
+  },
+  
+  
+  //
   // Common sender-js init
   // Nodemailer
   //
@@ -455,6 +507,30 @@ module.exports = {
     done();
   },
 
+  //
+  // Telegram
+  //
+  'test sender-js common re-initialization with Telegram only credentials': function(done) {
+    var tgSettings = {telegram: settings['telegram']};
+    assert.doesNotThrow(function() {
+      senderJs.reInit(tgSettings);
+      sender = senderJs.getCurrentService();
+    }, Error);
+    assert.ok(typeof sender, "object");
+    done();
+  },
+  
+  'test Telegram send message via common interface': function(done) {
+    var messageOptions = {
+      text: settings.testValues.message + 'test send email via common interface via Telegram'
+    };
+
+    sender.send(messageOptions, function(err, message) {
+      assert.ifError(err);
+      done();
+    });
+  },
+
   'test multiple objects init': function(done) {
     assert.doesNotThrow(function() {
       
@@ -477,7 +553,8 @@ module.exports = {
       to: settings.testValues.toEmail,
       from: settings.testValues.fromEmail,
       subject: settings.testValues.subject,
-      text: settings.testValues.message + ' test multiple messages send',
+      text: settings.testValues.message + ' t\n\
+est multiple messages send',
       http: {
         url: settings.request.url
       }

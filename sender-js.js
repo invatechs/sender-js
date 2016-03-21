@@ -1,9 +1,16 @@
+/**
+ * sender-js service implementation
+ * 
+ * @author Invatechs Software https://www.invatechs.com
+ */
+
 var util = require('util');
 var services = require('./services');
 var ServiceNodemailer = require('./lib/service-nodemailer.js');
 var ServiceMailgun = require('./lib/service-mailgun.js');
 var ServiceSlack = require('./lib/service-slack.js');
 var ServiceRequest = require('./lib/service-request.js');
+var ServiceTelegram = require('./lib/service-telegram.js');
 
 var senderServices = {};  // Current sender service
 
@@ -154,6 +161,26 @@ function resolveRequestOptions(rqName, rqOptions) {
 }
 
 /**
+ * Resolves Telegram options and saves them into local options object
+ * 
+ * @param {String} tgName Telegram internal service name
+ * @param {Object} tgOptions Telegram options to resolve
+ * @returns {undefined}
+ * @throws {Error} Exception
+ */
+function resolveTelegramOptions(tgName, tgOptions) {
+  if(!tgName) {
+    throw new Error("Wrong Telegram name: " + tgName.toString());
+  }
+  if(tgOptions.hasOwnProperty('token') && tgOptions.token) {
+    options[tgName].token = tgOptions.token;
+    options[tgName].chatId = tgOptions.chatId;
+  } else {
+    throw new Error("Wrong Telegram token: " + tgOptions.token);
+  }
+}
+
+/**
  * Parses options passed by argument
  * 
  * @param {Object} newOptions Options need to be parsed
@@ -184,6 +211,10 @@ function setOptions(newOptions) {
         case "request":
           resolveRequestOptions(services[service], newOptions[service]);
           options.sendServices.push("request");
+          break;
+        case "telegram":
+          resolveTelegramOptions(services[service], newOptions[service]);
+          options.sendServices.push("telegram");
           break;
       }
     } else {
@@ -253,17 +284,33 @@ module.exports.getMailgunService = function(options) {
 };
 
 /**
- * Return Slack service object
+ * Returns Slack service object
  * 
  * @param {Object} options Slack options
- * @returns {SlackService}
+ * @returns {ServiceSlack}
  */
 module.exports.getSlackService = function(options) {
   return new ServiceSlack(options);
 };
 
+/**
+ * Returns Request service object
+ * 
+ * @param {Object} options Request options
+ * @returns {ServiceRequest}
+ */
 module.exports.getRequestService = function(options) {
   return new ServiceRequest(options);
+};
+
+/**
+ * Returns Telegram service object
+ * 
+ * @param {Object} options Telegram options
+ * @returns {TelegramService}
+ */
+module.exports.getTelegramService = function(options) {
+  return new ServiceTelegram(options);
 };
 
 /**
@@ -318,6 +365,9 @@ var init = function (serviceOptions) {
         case "request":
           senderServices['request'] = new ServiceRequest(options, true);
           break;
+        case "telegram":
+          senderServices['telegram'] = new ServiceTelegram(options, true);
+          break;
       }
     }
   }
@@ -335,7 +385,6 @@ module.exports.reInit = function (serviceOptions) {
   senderServices = {};
   initOptions(true);
 
-  var service;
   try {
     init(serviceOptions);
   } catch(e) {

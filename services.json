@@ -6,5 +6,6 @@
   "yandex"     : "nodemailer",
   "mailgun"    : "mailgun-js",
   "slack"      : "slack",
-  "http"       : "request"
+  "http"       : "request",
+  "telegram"   : "telegram"
 }
