@@ -137,19 +137,23 @@ sender.send(messageOptions, function(err, message) {
 ```
 To send messages to Telegram sender-js needs respective chat ID. Chat ID can be received automatically by sending
 `/start` command to the library. To do that you need follow the next few steps:
-1. Add BotFather (@BotFather) to your chat
-2. Create new bot with `/newbot` command
-3. Add generated bot token to Telegram sender-js settings
-4. Add generated bot to your chat
-5. Start your application with sender-js lib
-6. Send `/start` command from Telegram to newly created bot
+
+  1. Add BotFather (@BotFather) to your chat
+  2. Create new bot with `/newbot` command
+  3. Add generated bot token to Telegram sender-js settings
+  4. Add generated bot to your chat
+  5. Start your application with sender-js lib
+  6. Send `/start` command from Telegram to newly created bot
+
 
 Also there is an option to add chat ID manually, if you already have it. There is one way to get it for the group chat:
-1. Open [Telegram Web](https://web.telegram.org/) in your browser
-2. Do the necessary authorization
-3. Create new chat group and add your bot to it
-4. In browser address bar there is chat ID which looks like `g144782871`
-5. Add it to sender-js settings as `chatId` field replacing "g" with "-": `-144782871`
+
+  1. Open [Telegram Web](https://web.telegram.org/) in your browser
+  2. Do the necessary authorization
+  3. Create new chat group and add your bot to it
+  4. In browser address bar there is chat ID which looks like `g144782871`
+  5. Add it to sender-js settings as `chatId` field replacing "g" with "-": `-144782871`
+
 Now sender-js can send messages to the group without `/start` command. Also you can transmit group chat ID to sender-js
 with the first technique described above.
 
