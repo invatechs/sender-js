@@ -10,7 +10,7 @@
   "contributors": [
     "Alex Sadovsky <alex.sad.dev@gmail.com>"
   ],
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Universal sender module",
   "main": "./sender-js.js",
   "dependencies": {
